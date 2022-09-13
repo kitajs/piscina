@@ -567,7 +567,14 @@ class ThreadPool {
 
   _addNewWorker () : void {
     const pool = this;
-    const worker = new Worker(resolve(__dirname, 'worker.js'), {
+
+    // When using some time on JIT transpiler, its possible (and preferable)
+    // to import the original typescript source file instead of the transpiled
+    // one. This also solves the problem when the worker ends up trying to
+    // import a typescript file, which is not supported by node and raw javascript files.
+    const ext = __filename.endsWith('.ts') ? '.ts' : '.js';
+
+    const worker = new Worker(resolve(__dirname, 'worker' + ext), {
       env: this.options.env,
       argv: this.options.argv,
       execArgv: this.options.execArgv,
